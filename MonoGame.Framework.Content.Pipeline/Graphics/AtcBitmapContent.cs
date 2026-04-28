@@ -1,4 +1,4 @@
-﻿// MonoGame - Copyright (C) MonoGame Foundation, Inc
+// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -67,18 +67,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             if (destinationRegion != new Rectangle(0, 0, Width, Height))
                 return false;
 
-            // If the source is not Vector4 or requires resizing, send it through BitmapContent.Copy
-            if (!(sourceBitmap is PixelBitmapContent<Vector4>) || sourceRegion.Width != destinationRegion.Width || sourceRegion.Height != destinationRegion.Height)
+            // Avoid unnecessary decompression/recompression by only re-encoding when the source is already a vector bitmap
+            if (!(sourceBitmap is PixelBitmapContent<Vector4> sourceVectorBitmap) || sourceRegion.Width != destinationRegion.Width || sourceRegion.Height != destinationRegion.Height)
             {
-                try
-                {
-                    BitmapContent.Copy(sourceBitmap, sourceRegion, this, destinationRegion);
-                    return true;
-                }
-                catch (InvalidOperationException)
-                {
-                    return false;
-                }
+                return false;
             }
 
             CompressionFormat compressionFormat;
@@ -94,7 +86,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                     throw new PipelineException();
             }
             BcnUtil.Encode(
-                sourceBitmap: sourceBitmap,
+                sourceBitmap: sourceVectorBitmap,
                 destinationFormat: compressionFormat,
                 out var compressedBytes);
 
