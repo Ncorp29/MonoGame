@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 /*
 Copyright (c) 2013, Milosz Krajewski
@@ -156,9 +156,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4
 		/// <returns>Compressed buffer.</returns>
 		public static byte[] Encode32(byte[] input, int inputOffset, int inputLength)
 		{
-			if (inputLength < 0) inputLength = input.Length - inputOffset;
-
 			if (input == null) throw new ArgumentNullException("input");
+			if (inputLength < 0) inputLength = input.Length - inputOffset;
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 
@@ -249,9 +248,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4
 		/// <returns>Decompressed buffer.</returns>
 		public static byte[] Decode32(byte[] input, int inputOffset, int inputLength, int outputLength)
 		{
-			if (inputLength < 0) inputLength = input.Length - inputOffset;
-
 			if (input == null) throw new ArgumentNullException("input");
+			if (inputLength < 0) inputLength = input.Length - inputOffset;
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 
@@ -332,9 +330,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4
 		/// <returns>Compressed buffer.</returns>
 		public static byte[] Encode64(byte[] input, int inputOffset, int inputLength)
 		{
-			if (inputLength < 0) inputLength = input.Length - inputOffset;
-
 			if (input == null) throw new ArgumentNullException("input");
+			if (inputLength < 0) inputLength = input.Length - inputOffset;
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 
@@ -425,9 +422,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4
 		/// <returns>Decompressed buffer.</returns>
 		public static byte[] Decode64(byte[] input, int inputOffset, int inputLength, int outputLength)
 		{
-			if (inputLength < 0) inputLength = input.Length - inputOffset;
-
 			if (input == null) throw new ArgumentNullException("input");
+			if (inputLength < 0) inputLength = input.Length - inputOffset;
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 
