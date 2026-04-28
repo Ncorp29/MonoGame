@@ -1,4 +1,4 @@
-﻿// MonoGame - Copyright (C) MonoGame Foundation, Inc
+// MonoGame - Copyright (C) MonoGame Foundation, Inc
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -17,6 +17,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
     /// <remarks>Note that AudioContent can load and process audio files that are not supported by the importers.</remarks>
     public class AudioContent : ContentItem, IDisposable
     {
+        private const int MaxAudioFileSize = 64 * 1024 * 1024;
+
         private bool _disposed;
         private readonly string _fileName;
         private readonly AudioFileType _fileType;
@@ -128,18 +130,33 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
                 // Only provide the data for WAV files.
                 if (audioFileType == AudioFileType.Wav)
                 {
-                    byte[] rawData;
+                    byte[] rawData = null;
 
                     // Must be opened in read mode otherwise it fails to open
                     // read-only files (found in some source control systems)
-                    using (var fs = new FileStream(audioFileName, FileMode.Open, FileAccess.Read))
+                    using (var fs = new FileStream(audioFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
-                        rawData = new byte[fs.Length];
-                        fs.Read(rawData, 0, rawData.Length);
+                        if (fs.Length < 0 || fs.Length > MaxAudioFileSize)
+                            throw new InvalidOperationException("Audio file is too large.");
+
+                        var length = (int)fs.Length;
+                        rawData = new byte[length];
+
+                        var totalRead = 0;
+                        while (totalRead < length)
+                        {
+                            var read = fs.Read(rawData, totalRead, length - totalRead);
+                            if (read == 0)
+                                throw new EndOfStreamException("Unexpected end of stream while reading audio data.");
+                            totalRead += read;
+                        }
                     }
 
                     AudioFormat riffAudioFormat;
                     var stripped = DefaultAudioProfile.StripRiffWaveHeader(rawData, out riffAudioFormat);
+
+                    if (stripped == null || stripped.Length == 0)
+                        throw new InvalidDataException("Invalid WAV data.");
 
                     if (riffAudioFormat != null)
                     {
@@ -170,8 +187,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Audio
         /// <param name="quality">Quality of the processed output audio. For streaming formats, it can be one of the following: Low (96 kbps), Medium (128 kbps), Best (192 kbps).  For WAV formats, it can be one of the following: Low (11kHz ADPCM), Medium (22kHz ADPCM), Best (44kHz PCM)</param>
         /// <param name="saveToFile">
         /// The name of the file that the converted audio should be saved into.  This is used for SongContent, where
-        /// the audio is stored external to the XNB file.  If this is null, then the converted audio is stored in
-        /// the Data property.
+        /// the audio is stored external to the XNB file.  If this is null, then the converted audio is stored in the
+        /// Data property.
         /// </param>
         [Obsolete("You should prefer to use AudioProfile.")]
         public void ConvertFormat(ConversionFormat formatType, ConversionQuality quality, string saveToFile)
